@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>StdApp</h1>
+    <h1>Student Module</h1>
+    <nuxt-child/>
   </div>
 </template>
-

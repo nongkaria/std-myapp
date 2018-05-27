@@ -1,7 +1,9 @@
-//store/index.js
+import Vue from 'vue'
+
 export const state = () => ({
   online: false,
   drawer: false,
+  user: {},
   students: [],
 })
 
@@ -12,31 +14,37 @@ export const mutations = {
   setDrawer(state, status) {
     state.drawer = status
   },
+  setUser(state, user) {
+    state.user = user
+  },
   setStudents(state, data) {
     state.students = data
   },
 }
 
 export const actions = {
-  loadStudents(store) {
+  async loadStudents(store) {
     // 1. โหลดข้อมูลเก่าจาก localStorage ก่อน
     let students = JSON.parse(window.localStorage.getItem('students') || '[]')
     // 2 commit
     store.commit('setStudents', students)
-    setInterval(() => {
-      // 3. ยิง api เพื่อข้อมูลใหม่จาก server
-      let newData = []
-      for (let i = 1; i <= 100; i++) {
-        newData.push({
-          code: ('' + i).padStart(4, '0'),
-          name: `Name${i}`,
-          room: '' + Math.ceil(i / 30),
-        })
-      }
-      // 4. commit
-      store.commit('setStudents', newData)
-      // 5. เก็บลง localStorage
-      window.localStorage.setItem('students', JSON.stringify(newData))
-    }, 5000)
+
+    // 3. ยิง api เพื่อข้อมูลใหม่จาก server
+    let res = await Vue.axios.post('/student/list?room=2', { room: '2', year: 3 })
+    // let res = await Vue.axios.get('/student/list?room=2')
+    // let res = await Vue.axios.get('/student/list', { params: { room: 2 } })
+
+    // 4. commit
+    store.commit('setStudents', res.data)
+    // 5. เก็บลง localStorage
+    window.localStorage.setItem('students', JSON.stringify(res.data))
+  },
+  loadUser(store) {
+    let user = window.sessionStorage.getItem('user')
+    if (!user) {
+      return false
+    }
+    store.commit('setUser', JSON.parse(user))
+    return true
   },
 }
